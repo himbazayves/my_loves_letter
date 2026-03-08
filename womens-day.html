@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Women's Day 🌹</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose: #c8556a;
+    --blush: #f2c4ce;
+    --deep: #1a0a0d;
+    --gold: #d4a04a;
+    --cream: #fdf6f0;
+    --petal1: #e8a0b0;
+    --petal2: #f5c6d0;
+    --petal3: #d4697e;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--deep);
+    font-family: 'Cormorant Garamond', serif;
+    cursor: default;
+  }
+
+  /* ── CANVAS PETALS ── */
+  #petalCanvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 10;
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  .screen.hidden {
+    opacity: 0; pointer-events: none; transform: scale(1.04);
+  }
+
+  /* ── SCREEN 1: ENVELOPE ── */
+  #screen1 { background: radial-gradient(ellipse at 50% 60%, #3d0d18 0%, #1a0a0d 70%); }
+
+  .date-tag {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(10px, 1.5vw, 13px);
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 1.5s ease 0.3s both;
+  }
+
+  .envelope-wrap {
+    position: relative;
+    animation: fadeUp 1.5s ease 0.6s both;
+  }
+
+  .envelope {
+    width: clamp(240px, 42vw, 360px);
+    height: clamp(170px, 28vw, 250px);
+    background: linear-gradient(145deg, #8b1a2e, #5c0d1e);
+    border-radius: 6px;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(200,85,106,0.35), 0 0 0 1px rgba(212,160,74,0.2);
+    cursor: pointer;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    overflow: hidden;
+  }
+  .envelope:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 40px 100px rgba(200,85,106,0.5), 0 0 0 1px rgba(212,160,74,0.4);
+  }
+
+  /* flap */
+  .envelope::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 55%;
+    background: linear-gradient(160deg, #6e1423, #4a0c18);
+    clip-path: polygon(0 0, 100% 0, 50% 75%);
+    transform-origin: top center;
+    transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+    z-index: 2;
+  }
+  .envelope.open::before { transform: rotateX(180deg); }
+
+  /* envelope body lines */
+  .envelope::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 60%),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 41px);
+  }
+
+  .envelope-seal {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px; height: 52px;
+    background: radial-gradient(circle, var(--gold) 0%, #a8762a 100%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 20px rgba(212,160,74,0.5);
+    z-index: 3;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .envelope.open .envelope-seal { opacity: 0; transform: translate(-50%,-50%) scale(0); }
+
+  .tap-hint {
+    margin-top: 1.8rem;
+    font-size: clamp(13px, 1.8vw, 15px);
+    color: rgba(242,196,206,0.5);
+    letter-spacing: 0.2em;
+    font-style: italic;
+    animation: pulse 2.5s ease infinite;
+  }
+
+  /* ── SCREEN 2: PETALS REVEAL ── */
+  #screen2 {
+    background: transparent;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 4vh 1rem;
+  }
+
+  .reveal-card {
+    background: linear-gradient(160deg, rgba(253,246,240,0.07) 0%, rgba(200,85,106,0.06) 100%);
+    border: 1px solid rgba(212,160,74,0.25);
+    border-radius: 4px;
+    padding: clamp(2rem, 4vw, 3.5rem) clamp(1.8rem, 5vw, 4rem);
+    max-width: min(680px, 90vw);
+    width: 100%;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 80px rgba(200,85,106,0.08);
+    animation: cardReveal 1.4s cubic-bezier(0.16,1,0.3,1) both;
+    margin: auto;
+  }
+
+  @keyframes cardReveal {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .card-ornament {
+    font-size: clamp(28px, 5vw, 42px);
+    margin-bottom: 1.2rem;
+    animation: floatRose 4s ease infinite;
+    display: block;
+  }
+
+  .card-heading {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 1.6vw, 13px);
+    letter-spacing: 0.45em;
+    color: var(--gold);
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s both;
+  }
+
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 6vw, 62px);
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+  .card-title em {
+    font-style: italic;
+    color: var(--blush);
+  }
+
+  .divider {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s both;
+  }
+
+  .card-body {
+    font-size: clamp(15px, 2.2vw, 19px);
+    font-weight: 300;
+    color: rgba(253,246,240,0.82);
+    line-height: 1.85;
+    opacity: 0;
+    animation: fadeUp 1s ease 1s both;
+  }
+  .card-body strong {
+    color: var(--blush);
+    font-weight: 400;
+  }
+
+  .card-sign {
+    margin-top: 2.2rem;
+    font-size: clamp(13px, 1.8vw, 16px);
+    font-style: italic;
+    color: rgba(212,160,74,0.7);
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s both;
+  }
+
+  /* next button */
+  .btn-next {
+    margin-top: 2.4rem;
+    display: inline-block;
+    padding: 0.7rem 2.2rem;
+    border: 1px solid rgba(212,160,74,0.45);
+    color: rgba(212,160,74,0.85);
+    font-family: 'Cinzel', serif;
+    font-size: clamp(10px, 1.4vw, 12px);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.4s both;
+  }
+  .btn-next:hover {
+    background: rgba(212,160,74,0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-2px);
+  }
+
+  /* ── SCREEN 3: FINALE ── */
+  #screen3 { background: radial-gradient(ellipse at 50% 40%, #3d0d18 0%, #1a0a0d 80%); }
+
+  .finale-wrap {
+    text-align: center;
+    max-width: min(700px, 90vw);
+    animation: cardReveal 1.4s ease both;
+  }
+
+  .heart-burst {
+    font-size: clamp(48px, 9vw, 80px);
+    display: block;
+    margin-bottom: 1.5rem;
+    animation: heartBeat 1.5s ease infinite;
+  }
+
+  .finale-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 4.5vw, 46px);
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s both;
+  }
+  .finale-title span { color: var(--rose); }
+
+  .finale-quote {
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(242,196,206,0.85);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s both;
+  }
+
+  .rose-row {
+    font-size: clamp(20px, 3.5vw, 30px);
+    letter-spacing: 0.4em;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s both;
+  }
+
+  .replay-btn {
+    margin-top: 2.5rem;
+    display: inline-block;
+    padding: 0.6rem 2rem;
+    border: 1px solid rgba(200,85,106,0.4);
+    color: rgba(200,85,106,0.7);
+    font-family: 'Cinzel', serif;
+    font-size: clamp(9px, 1.2vw, 11px);
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.1s both;
+  }
+  .replay-btn:hover {
+    background: rgba(200,85,106,0.08);
+    color: var(--rose);
+    transform: translateY(-2px);
+  }
+
+  /* ── BACKGROUND GLOW ── */
+  .glow {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(80px);
+    opacity: 0.12;
+  }
+  .glow1 { width: 500px; height: 500px; background: var(--rose); top: -100px; right: -100px; animation: drift1 18s ease infinite alternate; }
+  .glow2 { width: 400px; height: 400px; background: #7a1a2e; bottom: -80px; left: -80px; animation: drift2 14s ease infinite alternate; }
+
+  /* ── KEYFRAMES ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.5; } 50% { opacity: 0.9; }
+  }
+  @keyframes floatRose {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+  }
+  @keyframes heartBeat {
+    0%,100% { transform: scale(1); }
+    14% { transform: scale(1.15); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+  }
+  @keyframes drift1 {
+    from { transform: translate(0,0); } to { transform: translate(-60px, 80px); }
+  }
+  @keyframes drift2 {
+    from { transform: translate(0,0); } to { transform: translate(50px, -60px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient glows -->
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<!-- Petal canvas -->
+<canvas id="petalCanvas"></canvas>
+
+<!-- SCREEN 1: Envelope -->
+<div class="screen" id="screen1">
+  <div class="date-tag">MARCH 8, 2026 &nbsp;·&nbsp; BIDERI FACCETE &nbsp;·&nbsp; A LETTER FROM ONE WHO LOVES YOU</div>
+  <div class="envelope-wrap">
+    <div class="envelope" id="envelope" onclick="openEnvelope()">
+      <div class="envelope-seal">🌹</div>
+    </div>
+    <p class="tap-hint">tap to open your letter</p>
+  </div>
+</div>
+
+<!-- SCREEN 2: Message -->
+<div class="screen hidden" id="screen2">
+  <div class="reveal-card">
+    <span class="card-ornament">🌸</span>
+    <div class="card-heading">A letter for you</div>
+    <h1 class="card-title">Hello,<br><em>beautiful soul.</em></h1>
+    <div class="divider"></div>
+    <p class="card-body">
+      For the past five or six years, I have had the privilege of knowing you , and not a single day has passed without me being amazed by the woman you are. So <strong>strong</strong>, so <strong>hardworking</strong>, with a heart so <strong>pure</strong>. Your beauty shines not only on the outside, but even more from within.<br><br>
+      These are not just words. They come from my heart and from what I have truly seen and experienced in the time I've spent close to you. I have watched the way you carry yourself, the way you stand as a <strong>pillar for your family</strong>, fighting for them with strength and grace. I've seen how loyal and caring you are to the people around you.<br><br>
+      You are truly a <strong>rare gem</strong> , the kind of woman anyone would be blessed to have in their life. You may not always realize it, but your strength, your kindness, and your soul make you <strong>extraordinary</strong>. Those of us who have the chance to know you are truly blessed.<br><br>
+      And today is simply a reminder of something we appreciate <em>every single day.</em>
+    </p>
+    <div class="card-sign">— From one who loves you every single moment, <strong>Himbaza Yves</strong> 💛</div>
+    <button class="btn-next" onclick="goFinale()">continue →</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Finale -->
+<div class="screen hidden" id="screen3">
+  <div class="finale-wrap">
+    <span class="heart-burst">💗</span>
+    <h2 class="finale-title">Happy <span>Women's</span><br>Day</h2>
+    <p class="finale-quote">
+      "Her beauty shines outward, her soul shines deeper,<br>
+      and her worth is greater than diamonds."
+    </p>
+    <div class="rose-row">🌹 🌹 🌹</div>
+    <button class="replay-btn" onclick="replay()">↺ replay from start</button>
+  </div>
+</div>
+
+<script>
+// ── PETAL CANVAS ──
+const canvas = document.getElementById('petalCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, petals = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const COLORS = ['#e8a0b0','#f5c6d0','#d4697e','#f2c4ce','#c8556a','#f7d4db'];
+
+function Petal() {
+  this.reset();
+}
+Petal.prototype.reset = function() {
+  this.x = Math.random() * W;
+  this.y = -20 - Math.random() * 100;
+  this.size = 4 + Math.random() * 9;
+  this.speedY = 0.5 + Math.random() * 1.2;
+  this.speedX = (Math.random() - 0.5) * 0.8;
+  this.rotation = Math.random() * Math.PI * 2;
+  this.rotSpeed = (Math.random() - 0.5) * 0.03;
+  this.opacity = 0.3 + Math.random() * 0.5;
+  this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+  this.swing = Math.random() * Math.PI * 2;
+  this.swingSpeed = 0.008 + Math.random() * 0.012;
+};
+Petal.prototype.update = function() {
+  this.swing += this.swingSpeed;
+  this.x += this.speedX + Math.sin(this.swing) * 0.6;
+  this.y += this.speedY;
+  this.rotation += this.rotSpeed;
+  if (this.y > H + 30) this.reset();
+};
+Petal.prototype.draw = function() {
+  ctx.save();
+  ctx.globalAlpha = this.opacity;
+  ctx.translate(this.x, this.y);
+  ctx.rotate(this.rotation);
+  ctx.fillStyle = this.color;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, this.size, this.size * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+};
+
+for (let i = 0; i < 60; i++) {
+  const p = new Petal();
+  p.y = Math.random() * H; // start spread
+  petals.push(p);
+}
+
+function animPetals() {
+  ctx.clearRect(0, 0, W, H);
+  petals.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animPetals);
+}
+animPetals();
+
+// ── TRANSITIONS ──
+function openEnvelope() {
+  const env = document.getElementById('envelope');
+  env.classList.add('open');
+  setTimeout(() => {
+    document.getElementById('screen1').classList.add('hidden');
+    document.getElementById('screen2').classList.remove('hidden');
+  }, 900);
+}
+
+function goFinale() {
+  document.getElementById('screen2').classList.add('hidden');
+  document.getElementById('screen3').classList.remove('hidden');
+  // burst more petals
+  for (let i = 0; i < 40; i++) {
+    const p = new Petal();
+    p.y = H * 0.4 + Math.random() * 100;
+    p.speedY = -2 - Math.random() * 3;
+    p.speedX = (Math.random() - 0.5) * 4;
+    petals.push(p);
+  }
+}
+
+function replay() {
+  document.getElementById('envelope').classList.remove('open');
+  document.getElementById('screen3').classList.add('hidden');
+  document.getElementById('screen2').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('screen1').classList.remove('hidden');
+  }, 100);
+}
+</script>
+</body>
+</html>
